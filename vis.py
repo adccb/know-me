@@ -20,7 +20,8 @@ with open('./data.csv', newline='') as f:
 
 formats = ['bo-', 'go-', 'ro-', 'co-', 'mo-', 'yo-', 'ko-']
 bar_charts = [
-    'hallucination'        
+    'hallucination',
+    'memory_lost'
 ]
 
 def plot_line(ax, key, fmt):
@@ -31,7 +32,11 @@ def plot_line(ax, key, fmt):
     ax.plot_date(dates, values, fmt, label=key)
 
 def plot_bar_chart(ax, key, fmt):
-    row = data[key]
+    try:
+        row = data[key]
+    except KeyError:
+        return False
+
     dates = [ datetime.fromtimestamp(epoch) for epoch, value in row ]
     values = [ value for epoch, value in row ]
     plt.bar(dates, values, 0.005, label=key, color=fmt[0])
@@ -51,8 +56,10 @@ def generate_graph(*graphs):
     plt.show()
 
 def __transform_data(key, data):
-    if key == 'fear':
+    if key == 'fear' or key == 'sleep_quality':
         return data / 20
+    if key == 'ideation':
+        return data / 10
     else:
         return data
 
@@ -65,7 +72,9 @@ if __name__ == '__main__':
     parser.add_argument('-l', action='store_true', default=False, help='add hallucinations')
     parser.add_argument('-m', action='store_true', default=False, help='add mood')
     parser.add_argument('-p', action='store_true', default=False, help='add paranoia')
+    parser.add_argument('-r', action='store_true', default=False, help='add rq')
     parser.add_argument('-s', action='store_true', default=False, help='add fear')
+    parser.add_argument('-y', action='store_true', default=False, help='add memory lost')
     args = parser.parse_args()
 
     graphs = []
@@ -78,7 +87,9 @@ if __name__ == '__main__':
     args.l and graphs.append('hallucination')
     args.m and graphs.append('mood')
     args.p and graphs.append('paranoia')
+    args.r and graphs.append('sleep_quality')
     args.s and graphs.append('fear')
+    args.y and graphs.append('memory_lost')
 
     generate_graph(*graphs)
 
